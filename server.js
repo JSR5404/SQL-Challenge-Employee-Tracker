@@ -1,33 +1,24 @@
-//dependencies required
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 require("console.table");
-//const sql = require("./sql");
 
-//mysql connection
+
+
 const connection = mysql.createConnection({
     host: 'localhost',
-
-    // Your port; if not 3306
     port: 3306,
-
-    // Your username
     user: 'root',
 
-    // Your password
     password: '',
-    database: 'employeesDB'
+    database: 'employeeDB'
 });
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId);
     console.log(`Employee Manager`)
-    // runs the app
     firstPrompt();
 });
 
-// function which prompts the user for what action they should take
 function firstPrompt() {
 
   inquirer
@@ -77,7 +68,6 @@ function firstPrompt() {
     });
 }
 
-//View Employees/ READ all, SELECT * FROM
 function viewEmployee() {
   console.log("Viewing employees\n");
 
@@ -95,15 +85,13 @@ function viewEmployee() {
     if (err) throw err;
 
     console.table(res);
-    console.log("Employees viewed!\n");
+   
 
     firstPrompt();
   });
 
 }
 
-//"View Employees by Department" / READ by, SELECT * FROM
-// Make a department array
 function viewEmployeeByDepartment() {
   console.log("Viewing employees by department\n");
 
@@ -124,13 +112,12 @@ function viewEmployeeByDepartment() {
     }));
 
     console.table(res);
-    console.log("Department view succeed!\n");
+    console.log("Department view complete!\n");
 
     promptDepartment(departmentChoices);
   });
 }
 
-// User choose the department list, then employees pop up
 function promptDepartment(departmentChoices) {
 
   inquirer
@@ -138,7 +125,7 @@ function promptDepartment(departmentChoices) {
       {
         type: "list",
         name: "departmentId",
-        message: "Which department would you choose?",
+        message: "Choose a department",
         choices: departmentChoices
       }
     ])
@@ -166,9 +153,8 @@ function promptDepartment(departmentChoices) {
 }
 
 
-// Make a employee array
 function addEmployee() {
-  console.log("Inserting an employee!")
+  console.log("Inserting an employee")
 
   var query =
     `SELECT r.id, r.title, r.salary 
@@ -182,7 +168,6 @@ function addEmployee() {
     }));
 
     console.table(res);
-    console.log("RoleToInsert!");
 
     promptInsert(roleChoices);
   });
@@ -205,7 +190,7 @@ function promptInsert(roleChoices) {
       {
         type: "list",
         name: "roleId",
-        message: "What is the employee's role?",
+        message: "Select the employee's role",
         choices: roleChoices
       },
     ])
@@ -213,7 +198,7 @@ function promptInsert(roleChoices) {
       console.log(answer);
 
       var query = `INSERT INTO employee SET ?`
-      // when finished prompting, insert a new item into the db with that info
+
       connection.query(query,
         {
           first_name: answer.first_name,
@@ -231,9 +216,6 @@ function promptInsert(roleChoices) {
         });
     });
 }
-
-//"Remove Employees" / DELETE, DELETE FROM
-// Make a employee array to delete
 function removeEmployees() {
   console.log("Deleting an employee");
 
@@ -255,7 +237,6 @@ function removeEmployees() {
   });
 }
 
-// User choose the employee list, then employee is deleted
 function promptDelete(deleteEmployeeChoices) {
 
   inquirer
@@ -263,14 +244,14 @@ function promptDelete(deleteEmployeeChoices) {
       {
         type: "list",
         name: "employeeId",
-        message: "Which employee do you want to remove?",
+        message: "Select employee to remove?",
         choices: deleteEmployeeChoices
       }
     ])
     .then(function (answer) {
 
       var query = `DELETE FROM employee WHERE ?`;
-      // when finished prompting, insert a new item into the db with that info
+      
       connection.query(query, { id: answer.employeeId }, function (err, res) {
         if (err) throw err;
 
@@ -282,7 +263,6 @@ function promptDelete(deleteEmployeeChoices) {
     });
 }
 
-//"Update Employee Role" / UPDATE,
 function updateEmployeeRole() { 
   employeeArray();
 
@@ -316,7 +296,7 @@ function employeeArray() {
 }
 
 function roleArray(employeeChoices) {
-  console.log("Updating an role");
+  console.log("Updating a role");
 
   var query =
     `SELECT r.id, r.title, r.salary 
@@ -344,7 +324,7 @@ function promptEmployeeRole(employeeChoices, roleChoices) {
       {
         type: "list",
         name: "employeeId",
-        message: "Which employee do you want to set with the role?",
+        message: "Which employee do you want to update?",
         choices: employeeChoices
       },
       {
@@ -357,7 +337,7 @@ function promptEmployeeRole(employeeChoices, roleChoices) {
     .then(function (answer) {
 
       var query = `UPDATE employee SET role_id = ? WHERE id = ?`
-      // when finished prompting, insert a new item into the db with that info
+      
       connection.query(query,
         [ answer.roleId,  
           answer.employeeId
@@ -366,7 +346,7 @@ function promptEmployeeRole(employeeChoices, roleChoices) {
           if (err) throw err;
 
           console.table(res);
-          console.log(res.affectedRows + "Updated successfully!");
+          console.log(res.affectedRows + "Update complete");
 
           firstPrompt();
         });
@@ -375,7 +355,7 @@ function promptEmployeeRole(employeeChoices, roleChoices) {
 
 
 
-//"Add Role" / CREATE: INSERT INTO
+
 function addRole() {
 
   var query =
@@ -390,13 +370,11 @@ function addRole() {
   connection.query(query, function (err, res) {
     if (err) throw err;
 
-    // (callbackfn: (value: T, index: number, array: readonly T[]) => U, thisArg?: any)
     const departmentChoices = res.map(({ id, name }) => ({
       value: id, name: `${id} ${name}`
     }));
 
     console.table(res);
-    console.log("Department array!");
 
     promptAddRole(departmentChoices);
   });
@@ -436,7 +414,7 @@ function promptAddRole(departmentChoices) {
           if (err) throw err;
 
           console.table(res);
-          console.log("Role Inserted!");
+          console.log("Role Inserted");
 
           firstPrompt();
         });
